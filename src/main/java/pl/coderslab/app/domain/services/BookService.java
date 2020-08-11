@@ -1,0 +1,18 @@
+package pl.coderslab.app.domain.services;
+
+import pl.coderslab.app.exceptions.InvalidIdException;
+
+
+import pl.coderslab.app.domain.model.Book;
+
+import java.util.List;
+
+public interface BookService {
+    List<Book> loadAll();
+
+    Book loadById(long id) throws InvalidIdException;
+
+    void save(Book book) throws InvalidIdException;
+
+    void delete(long id) throws InvalidIdException;
+}
