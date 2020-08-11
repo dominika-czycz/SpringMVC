@@ -9,17 +9,22 @@ import pl.coderslab.app.domain.model.Book;
 import pl.coderslab.app.domain.repositories.AuthorRepository;
 import pl.coderslab.app.domain.repositories.BookRepository;
 import pl.coderslab.app.exceptions.InvalidIdException;
+import pl.coderslab.app.exceptions.ValidationFailedException;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.Validator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 @Slf4j
-@Transactional
 @RequiredArgsConstructor
+@Transactional
 public class RepositoryBookService implements BookService {
     private final BookRepository bookRepository;
     private final AuthorRepository authorRepository;
+    private final Validator validator;
 
     @Override
     public List<Book> loadAll() {
@@ -35,13 +40,27 @@ public class RepositoryBookService implements BookService {
     }
 
     @Override
-    public void save(Book book) throws InvalidIdException {
+    public void save(Book book) throws InvalidIdException, ValidationFailedException {
         log.debug("Entity from request {}.", book);
-        if (book.getId() == null || book.getId().equals(0L)) {
-            saveNewBook(book);
+        if (isValid(book)) {
+            if (book.getId().equals(0L)) {
+                saveNewBook(book);
+            } else {
+                updateBook(book);
+            }
         } else {
-            updateBook(book);
+            throw new ValidationFailedException("Entity from request: " + book + " has failed validation!");
         }
+    }
+
+    private boolean isValid(Book toValid) {
+        final Set<ConstraintViolation<Book>> violations = validator.validate(toValid);
+        if (violations.size() > 0) {
+            log.warn("Entity {} fails validation!", toValid);
+            violations.forEach(v -> log.warn("Property: {}, invalid value: {}, message: {}", v.getPropertyPath(), v.getInvalidValue(), v.getMessage()));
+            return false;
+        }
+        return true;
     }
 
     private void updateBook(Book book) throws InvalidIdException {
