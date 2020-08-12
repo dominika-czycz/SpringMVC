@@ -13,7 +13,6 @@ import pl.coderslab.app.exceptions.InvalidIdException;
 import pl.coderslab.app.exceptions.ValidationFailedException;
 
 
-
 @ControllerAdvice
 public class RestResponseEntityExceptionHandler extends ResponseEntityExceptionHandler {
 

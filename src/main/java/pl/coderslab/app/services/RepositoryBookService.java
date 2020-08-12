@@ -66,17 +66,34 @@ public class RepositoryBookService implements BookService {
         log.debug("Entity {} from request.", book);
         final Book toUpdate = loadById(book.getId());
         log.debug("Preparing entity {} to update...", toUpdate);
-        final String authorName = book.getAuthorName();
-        final Author author = getFromDbPersistIfRequired(authorName);
+        final Author author = getAuthor(book);
         toUpdate.setTitle(book.getTitle());
         toUpdate.setIsbn(book.getIsbn());
         toUpdate.setPublisher(book.getIsbn());
         toUpdate.setType(book.getType());
-        toUpdate.setAuthorName(authorName);
+        toUpdate.setAuthorName(author.getFullName());
         toUpdate.setAuthor(author);
         log.debug("Updating entity {}...", toUpdate);
         final Book updated = bookRepository.save(toUpdate);
         log.debug("Entity {} has been updated.", updated);
+    }
+
+    /**
+     * This method checks if the Book class object contains author field with id. If so it returns author record from database
+     * searching for result by the author's id. Otherwise it searches by author full name. If the author's record
+     * does not yet exist, it will be created.
+     *
+     * @param book - object from request
+     * @return author already existing in the database or newly created and saved in the database
+     * @throws InvalidIdException if the book already has author with id, but the author's id does not exist in database
+     */
+    private Author getAuthor(Book book) throws InvalidIdException {
+        if (book.getAuthor() == null || book.getAuthor().getId() == null || book.getAuthor().getId().equals(0L)) {
+            return getFromDbPersistIfRequired(book.getAuthorName());
+        }
+        final Long authorId = book.getAuthor().getId();
+        return authorRepository.findById(authorId)
+                .orElseThrow(new InvalidIdException("Author with id " + authorId + " does not exist in database"));
     }
 
     private Author getFromDbPersistIfRequired(String authorName) {
@@ -104,11 +121,11 @@ public class RepositoryBookService implements BookService {
         return saved;
     }
 
-    private void saveNewBook(Book book) {
+    private void saveNewBook(Book book) throws InvalidIdException {
         log.debug("Preparing to save entity {}...", book);
-        final String authorName = book.getAuthorName();
-        final Author author = getFromDbPersistIfRequired(authorName);
+        final Author author = getAuthor(book);
         book.setAuthor(author);
+        book.setAuthorName(author.getFullName());
         log.debug("Saving entity {}...", book);
         final Book saved = bookRepository.save(book);
         log.debug("Entity {} has been saved.", saved);
