@@ -4,7 +4,7 @@ Aplikacja zapewnia funkcjonalność beckendową do katalogowanie książek i aut
 Do stworzenia API wykorzystano m.in.: Spring MVC, Spring Data, Jackson, Hibernate Core i Hibernate Validator.
 
 Aplikacja zawiera dwa kontrolery: BookController oraz AuthorController. 
-Kontrolery te wykorzystują serwisy implementujące przetwarzanie danych z użyciem bazy MySQl. 
+Kontrolery te wykorzystują serwisy implementujące przetwarzanie danych z użyciem bazy MySQL. 
 
 Dane z REST API przed zapisem do bazy poddawane są walidacji. 
 
