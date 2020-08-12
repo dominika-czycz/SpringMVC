@@ -19,6 +19,7 @@ public class PersistenceConfig {
         emf.setPersistenceUnitName("myShelfPersistenceUnit");
         return emf;
     }
+
     @Bean
     public JpaTransactionManager transactionManager(EntityManagerFactory entityManagerFactory) {
         return new JpaTransactionManager(entityManagerFactory);

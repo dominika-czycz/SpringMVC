@@ -5,9 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.web.bind.annotation.*;
 import pl.coderslab.app.domain.model.Book;
-import pl.coderslab.app.domain.services.BookService;
 import pl.coderslab.app.exceptions.InvalidIdException;
 import pl.coderslab.app.exceptions.ValidationFailedException;
+import pl.coderslab.app.services.BookService;
 
 import java.util.List;
 

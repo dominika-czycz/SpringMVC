@@ -1,4 +1,4 @@
-package pl.coderslab.app.domain.services;
+package pl.coderslab.app.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,15 +41,14 @@ public class RepositoryBookService implements BookService {
 
     @Override
     public void save(Book book) throws InvalidIdException, ValidationFailedException {
-        log.debug("Entity from request {}.", book);
-        if (isValid(book)) {
-            if (book.getId().equals(0L)) {
-                saveNewBook(book);
-            } else {
-                updateBook(book);
-            }
-        } else {
+        log.debug("Entity from request: {}.", book);
+        if (!isValid(book)) {
             throw new ValidationFailedException("Entity from request: " + book + " has failed validation!");
+        }
+        if (book.getId().equals(0L)) {
+            saveNewBook(book);
+        } else {
+            updateBook(book);
         }
     }
 
@@ -57,7 +56,7 @@ public class RepositoryBookService implements BookService {
         final Set<ConstraintViolation<Book>> violations = validator.validate(toValid);
         if (violations.size() > 0) {
             log.warn("Entity {} fails validation!", toValid);
-            violations.forEach(v -> log.warn("Property: {}, invalid value: {}, message: {}", v.getPropertyPath(), v.getInvalidValue(), v.getMessage()));
+            violations.forEach(v -> log.warn("Property path: {}, invalid value: {}, message: {}", v.getPropertyPath(), v.getInvalidValue(), v.getMessage()));
             return false;
         }
         return true;
@@ -66,9 +65,9 @@ public class RepositoryBookService implements BookService {
     private void updateBook(Book book) throws InvalidIdException {
         log.debug("Entity {} from request.", book);
         final Book toUpdate = loadById(book.getId());
-        log.debug("Preparing to update entity {}...", toUpdate);
+        log.debug("Preparing entity {} to update...", toUpdate);
         final String authorName = book.getAuthorName();
-        final Author author = getExistingAuthor(authorName);
+        final Author author = getFromDbPersistIfRequired(authorName);
         toUpdate.setTitle(book.getTitle());
         toUpdate.setIsbn(book.getIsbn());
         toUpdate.setPublisher(book.getIsbn());
@@ -80,13 +79,13 @@ public class RepositoryBookService implements BookService {
         log.debug("Entity {} has been updated.", updated);
     }
 
-    private Author getExistingAuthor(String authorName) {
+    private Author getFromDbPersistIfRequired(String authorName) {
         final String[] names = authorName.split(" ");
         final String firstName = names[0];
         final String lastName = names[names.length - 1];
         final Optional<Author> author = authorRepository.findAuthorByFirstNameAndLastName(firstName, lastName);
         if (author.isEmpty()) {
-            log.debug("Author {} {} does not exist in database. Preparing to save... ", firstName, lastName);
+            log.debug("Author {} {} does not exist in database. Preparing to save new author... ", firstName, lastName);
             return saveAuthor(firstName, lastName);
         } else {
             log.debug("Entity {} from database.", author.get());
@@ -108,7 +107,7 @@ public class RepositoryBookService implements BookService {
     private void saveNewBook(Book book) {
         log.debug("Preparing to save entity {}...", book);
         final String authorName = book.getAuthorName();
-        final Author author = getExistingAuthor(authorName);
+        final Author author = getFromDbPersistIfRequired(authorName);
         book.setAuthor(author);
         log.debug("Saving entity {}...", book);
         final Book saved = bookRepository.save(book);
@@ -117,8 +116,9 @@ public class RepositoryBookService implements BookService {
 
     @Override
     public void delete(long id) throws InvalidIdException {
-        log.debug("Deleting book with id {}...", id);
+        log.debug("Preparing book with id {} to delete...", id);
         final Book book = loadById(id);
+        log.debug("Deleting book {}...", book);
         bookRepository.delete(book);
         log.debug("Entity {} has been deleted.", book);
     }

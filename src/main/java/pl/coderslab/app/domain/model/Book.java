@@ -31,8 +31,7 @@ public class Book {
     @ManyToOne
     @JoinColumn(nullable = false)
     private Author author;
-    @Column(nullable = false, name = "author_name")
-    @NotBlank
+    @Column(name = "author_name")
     @Size(min = 2, max = 255)
     private String authorName;
     @Column(nullable = false)

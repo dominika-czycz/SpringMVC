@@ -1,10 +1,9 @@
-package pl.coderslab.app.domain.services;
+package pl.coderslab.app.services;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import pl.coderslab.app.domain.model.Book;
 import pl.coderslab.app.exceptions.InvalidIdException;
-
 
 import java.util.ArrayList;
 import java.util.List;
