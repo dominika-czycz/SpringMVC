@@ -41,7 +41,8 @@ public class AuthorController {
     }
 
     @PutMapping("{id}")
-    public void editAuthor(@RequestBody Author author) throws InvalidIdException, ValidationFailedException {
+    public void editAuthor(@RequestBody Author author, @PathVariable Long id) throws InvalidIdException, ValidationFailedException {
+        author.setId(id);
         log.debug("Starting the editing procedure of entity {}...", author);
         authorService.save(author);
     }

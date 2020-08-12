@@ -41,7 +41,8 @@ public class BookController {
     }
 
     @PutMapping("{id}")
-    public void editBook(@RequestBody Book book) throws InvalidIdException, ValidationFailedException {
+    public void editBook(@RequestBody Book book, @PathVariable Long id) throws InvalidIdException, ValidationFailedException {
+        book.setId(id);
         log.debug("Starting the editing procedure of entity {}...", book);
         bookService.save(book);
     }
